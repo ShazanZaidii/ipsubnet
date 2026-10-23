@@ -116,4 +116,4 @@ Pushing a tag like `v1.0.1` makes GitHub Actions run the tests on all three oper
 
 ## Authors
 
-Group 4: Shazan Hussain Zaidi, Harshit Agrawal, Prabhat Bhati
+Shazan Hussain Zaidi, Harshit Agrawal, Prabhat Bhati
