@@ -19,8 +19,10 @@ curl -fsSL https://raw.githubusercontent.com/ShazanZaidii/ipsubnet/main/scripts/
 **With Python** (any OS, Python 3.8+):
 
 ```sh
-pip install git+https://github.com/ShazanZaidii/ipsubnet.git
+pip install ipsubnet
 ```
+
+or, to keep it isolated from other packages, `pipx install ipsubnet`.
 
 You can also download a ready-to-run binary from the [Releases page](https://github.com/ShazanZaidii/ipsubnet/releases/latest):
 
