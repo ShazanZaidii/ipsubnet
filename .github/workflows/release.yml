@@ -1,0 +1,89 @@
+name: release
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install .
+      - run: python -m unittest discover -s tests -v
+      - run: ipsubnet 192.168.1.10/24 --subnets 4
+
+  build:
+    needs: test
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-22.04
+            asset: ipsubnet-linux-x64
+          - os: ubuntu-22.04-arm
+            asset: ipsubnet-linux-arm64
+          - os: windows-latest
+            asset: ipsubnet-windows-x64.exe
+          - os: macos-latest
+            asset: ipsubnet-macos-arm64
+          - os: macos-15-intel
+            asset: ipsubnet-macos-x64
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install pyinstaller .
+      - name: Build standalone binary
+        shell: bash
+        run: |
+          pyinstaller --onefile --name ipsubnet --console src/ipsubnet/__main__.py
+          mkdir -p out
+          if [ -f dist/ipsubnet.exe ]; then cp dist/ipsubnet.exe "out/${{ matrix.asset }}"; else cp dist/ipsubnet "out/${{ matrix.asset }}"; fi
+          "out/${{ matrix.asset }}" 10.0.0.0/16 --subnets 4 --no-color
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.asset }}
+          path: out/${{ matrix.asset }}
+
+  package:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install build && python -m build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: python-package
+          path: dist/*
+
+  release:
+    needs: [build, package]
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: assets
+          merge-multiple: true
+      - name: Checksums
+        run: cd assets && sha256sum * > SHA256SUMS.txt
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: assets/*
+          generate_release_notes: true

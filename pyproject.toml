@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ipsubnet"
+dynamic = ["version"]
+description = "IP subnetting and addressing calculator for the command line (IPv4 and IPv6)"
+readme = "README.md"
+requires-python = ">=3.8"
+license = { text = "MIT" }
+authors = [
+  { name = "Shazan Hussain Zaidi" },
+  { name = "Harshit Agrawal" },
+  { name = "Prabhat Bhati" },
+]
+keywords = ["subnet", "cidr", "ip", "network", "calculator", "cli"]
+classifiers = [
+  "Environment :: Console",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3",
+  "Topic :: System :: Networking",
+]
+
+[project.urls]
+Homepage = "https://github.com/ShazanZaidii/ipsubnet"
+
+[project.scripts]
+ipsubnet = "ipsubnet.cli:main"
+
+[tool.setuptools.dynamic]
+version = { attr = "ipsubnet.__version__" }
